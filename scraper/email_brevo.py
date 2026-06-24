@@ -24,7 +24,7 @@ BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
 def send_digest(to_address: str, newsletter_name: str, digest_text: str) -> tuple[bool, str]:
     """Send a formatted digest email via Brevo. Returns (success, message)."""
     api_key     = os.environ.get("BREVO_API_KEY", "")
-    sender_email = os.environ.get("BREVO_SENDER_EMAIL", "digests@naylor-newsletters.com")
+    sender_email = os.environ.get("BREVO_SENDER_EMAIL", "hananiel91@gmail.com")
     sender_name  = os.environ.get("BREVO_SENDER_NAME", "Naylor Content Digests")
 
     if not api_key:
