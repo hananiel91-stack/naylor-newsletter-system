@@ -1,3 +1,16 @@
 {
-  "newsletters": []
+  "newsletters": [
+    {
+      "id": "nl_1782320136221",
+      "newsletter_name": "Facilities Management",
+      "editor_email": "awoods@naylor.com",
+      "source_urls": "https://facilityexecutive.com/security-and-safety\nhttps://www.insidehighered.com/news/business/physical-campuses\nhttps://www.bdcnetwork.com/\nhttps://www.facilitiesnet.com/\nhttps://www.campussafetymagazine.com/\nhttps://spaces4learning.com/home.aspx\nhttps://www.securitymagazine.com/topics/2228-physical-security\nhttps://universitybusiness.com/category/student-success/campus-safety/\nhttps://cmmonline.com/topics/facility-management",
+      "cutoff_days": 30,
+      "target_count": 20,
+      "frequency": "monthly",
+      "run_day": "1st",
+      "active": "yes",
+      "created": "2026-06-24"
+    }
+  ]
 }
