@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Naylor Newsletter Content System</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --teal:     #1D9E75;
+    --teal-lt:  #E1F5EE;
+    --teal-dk:  #0F6E56;
+    --ink:      #1a1a1a;
+    --muted:    #666;
+    --border:   #e0e0dc;
+    --bg:       #fafaf8;
+    --white:    #ffffff;
+    --danger:   #c0392b;
+    --danger-lt:#fdf0ef;
+    --amber:    #b45309;
+    --amber-lt: #fef3c7;
+    --radius:   8px;
+    --shadow:   0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+  }
+
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg);
+         color: var(--ink); min-height: 100vh; line-height: 1.6; }
+
+  /* Header */
+  .site-header { background: var(--teal); padding: 0 24px; height: 56px;
+                 display: flex; align-items: center; justify-content: space-between; }
+  .site-header h1 { color: #fff; font-size: 16px; font-weight: 600; letter-spacing: -.01em; }
+  .site-header span { color: rgba(255,255,255,.65); font-size: 12px; }
+
+  /* Layout */
+  .page { max-width: 680px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  /* Cards */
+  .card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+          box-shadow: var(--shadow); padding: 28px; margin-bottom: 20px; }
+  .card-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .card-sub   { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+
+  /* Forms */
+  .field { margin-bottom: 18px; }
+  .field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 5px; }
+  .field .hint  { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  input[type=text], input[type=email], input[type=number], select, textarea {
+    width: 100%; padding: 9px 12px; border: 1px solid var(--border);
+    border-radius: 6px; font-size: 14px; font-family: inherit;
+    background: var(--white); color: var(--ink);
+    transition: border-color .15s; outline: none; }
+  input:focus, select:focus, textarea:focus { border-color: var(--teal); }
+  textarea { resize: vertical; min-height: 100px; }
+
+  /* Row layout for pairs */
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 480px) { .row { grid-template-columns: 1fr; } }
+
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px;
+         border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer;
+         border: none; transition: background .15s, opacity .15s; }
+  .btn-primary  { background: var(--teal); color: #fff; }
+  .btn-primary:hover  { background: var(--teal-dk); }
+  .btn-secondary { background: transparent; color: var(--teal);
+                   border: 1px solid var(--teal); }
+  .btn-secondary:hover { background: var(--teal-lt); }
+  .btn-danger   { background: var(--danger); color: #fff; }
+  .btn-danger:hover { opacity: .88; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+
+  /* Alerts */
+  .alert { padding: 12px 16px; border-radius: 6px; font-size: 13px; margin-bottom: 16px; }
+  .alert-success { background: var(--teal-lt); color: var(--teal-dk); border: 1px solid #9FE1CB; }
+  .alert-error   { background: var(--danger-lt); color: var(--danger); border: 1px solid #f5c6c3; }
+  .alert-info    { background: var(--amber-lt); color: var(--amber); border: 1px solid #fde68a; }
+
+  /* Newsletter card (list view) */
+  .nl-card { background: var(--white); border: 1px solid var(--border);
+             border-radius: var(--radius); padding: 18px 20px; margin-bottom: 12px; }
+  .nl-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .nl-name  { font-size: 15px; font-weight: 600; }
+  .nl-meta  { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px;
+           border-radius: 20px; }
+  .badge-active  { background: var(--teal-lt); color: var(--teal-dk); }
+  .badge-paused  { background: #f3f3f1; color: #888; }
+  .nl-actions { display: flex; gap: 8px; flex-shrink: 0; }
+  .btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 5px; }
+
+  /* Divider */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+  /* Lookup section */
+  .lookup-row { display: flex; gap: 10px; }
+  .lookup-row input { flex: 1; }
+
+  /* Loading spinner */
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.4);
+             border-top-color: #fff; border-radius: 50%;
+             animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Section visibility */
+  .hidden { display: none !important; }
+
+  /* Frequency/run_day inline row */
+  .freq-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* Step indicator for lookup flow */
+  .step-label { font-size: 12px; font-weight: 600; text-transform: uppercase;
+                letter-spacing: .05em; color: var(--teal); margin-bottom: 16px; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <h1>Naylor Newsletter Content System</h1>
+  <span>Editor portal</span>
+</header>
+
+<main class="page">
+
+  <!-- ── LOOKUP SECTION ─────────────────────────────────── -->
+  <div id="section-lookup">
+    <div class="card">
+      <div class="card-title">Manage your newsletter digest</div>
+      <div class="card-sub">Enter your Naylor email address to see your current setup or add a new newsletter.</div>
+
+      <div id="alert-lookup"></div>
+
+      <div class="field">
+        <label for="lookup-email">Your email address</label>
+        <div class="lookup-row">
+          <input type="email" id="lookup-email" placeholder="you@naylor.com" autocomplete="email">
+          <button class="btn btn-primary" onclick="handleLookup()">
+            <span id="lookup-btn-text">Look up</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RESULTS SECTION ────────────────────────────────── -->
+  <div id="section-results" class="hidden">
+
+    <div class="step-label" id="results-email-label"></div>
+
+    <div id="alert-results"></div>
+
+    <!-- Existing newsletters list -->
+    <div id="existing-list"></div>
+
+    <!-- Add new button -->
+    <div id="add-new-prompt" class="hidden">
+      <button class="btn btn-secondary" onclick="showAddForm()">+ Add a newsletter</button>
+    </div>
+
+    <hr class="divider" id="form-divider" style="display:none">
+
+    <!-- Add / Edit form -->
+    <div id="nl-form" class="hidden">
+      <div class="card">
+        <div class="card-title" id="form-title">Add a newsletter</div>
+        <div class="card-sub">Fill in the details below. You can update these at any time.</div>
+
+        <input type="hidden" id="form-mode" value="add">
+        <input type="hidden" id="form-id" value="">
+
+        <div class="field">
+          <label for="f-name">Newsletter name</label>
+          <input type="text" id="f-name" placeholder="e.g. Facilities Management Monthly">
+        </div>
+
+        <div class="field">
+          <label for="f-urls">Source URLs <span style="font-weight:400;color:var(--muted)">(one per line)</span></label>
+          <textarea id="f-urls" placeholder="https://facilityexecutive.com/security-and-safety&#10;https://www.facilitiesnet.com/&#10;https://cmmonline.com/topics/facility-management"></textarea>
+          <div class="hint">Paste the section or category pages you want monitored — not the homepage.</div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="f-cutoff">Look back how many days?</label>
+            <input type="number" id="f-cutoff" value="30" min="7" max="90">
+            <div class="hint">30 = articles from the last 30 days</div>
+          </div>
+          <div class="field">
+            <label for="f-target">Target article count</label>
+            <input type="number" id="f-target" value="30" min="5" max="60">
+          </div>
+        </div>
+
+        <div class="freq-row">
+          <div class="field">
+            <label for="f-freq">How often?</label>
+            <select id="f-freq" onchange="updateRunDayOptions()">
+              <option value="daily">Daily</option>
+              <option value="weekly" selected>Weekly</option>
+              <option value="biweekly">Every two weeks</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </div>
+          <div class="field" id="run-day-field">
+            <label for="f-runday">Which day?</label>
+            <select id="f-runday"></select>
+          </div>
+        </div>
+
+        <div id="alert-form"></div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" id="save-btn" onclick="saveNewsletter()">Save newsletter</button>
+          <button class="btn btn-secondary" onclick="cancelForm()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+// ── Configuration ────────────────────────────────────────────────────────────
+// Replace OWNER and REPO with your GitHub username and repository name.
+const GITHUB_OWNER = "REPLACE_WITH_YOUR_GITHUB_USERNAME";
+const GITHUB_REPO  = "REPLACE_WITH_YOUR_REPO_NAME";
+const CONFIG_PATH  = "newsletters.json";
+const GITHUB_TOKEN = ""; // Leave blank — editors use their own PAT via prompt, or we use the public API trick below
+
+// GitHub API base
+const API = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${CONFIG_PATH}`;
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let currentEmail = "";
+let allNewsletters = [];
+let fileSha = "";
+
+// ── Lookup ────────────────────────────────────────────────────────────────────
+async function handleLookup() {
+  const email = document.getElementById("lookup-email").value.trim().toLowerCase();
+  if (!email || !email.includes("@")) {
+    showAlert("alert-lookup", "Please enter a valid email address.", "error");
+    return;
+  }
+
+  setLookupLoading(true);
+  clearAlert("alert-lookup");
+
+  try {
+    const { newsletters, sha } = await fetchConfig();
+    allNewsletters = newsletters;
+    fileSha = sha;
+    currentEmail = email;
+
+    document.getElementById("section-lookup").classList.add("hidden");
+    document.getElementById("section-results").classList.remove("hidden");
+    document.getElementById("results-email-label").textContent = email;
+
+    renderList();
+  } catch (e) {
+    showAlert("alert-lookup", `Could not load config: ${e.message}`, "error");
+  } finally {
+    setLookupLoading(false);
+  }
+}
+
+async function fetchConfig() {
+  const resp = await fetch(API, {
+    headers: { "Accept": "application/vnd.github+json" }
+  });
+  if (!resp.ok) throw new Error(`GitHub API returned ${resp.status}`);
+  const data = await resp.json();
+  const content = JSON.parse(atob(data.content.replace(/\n/g, "")));
+  return { newsletters: content.newsletters || [], sha: data.sha };
+}
+
+// ── Render list ───────────────────────────────────────────────────────────────
+function renderList() {
+  const mine = allNewsletters.filter(n => n.editor_email === currentEmail);
+  const list = document.getElementById("existing-list");
+  const addPrompt = document.getElementById("add-new-prompt");
+
+  if (mine.length === 0) {
+    list.innerHTML = `<div class="alert alert-info">No newsletters found for ${currentEmail}. Add one below.</div>`;
+    showAddForm();
+    addPrompt.classList.add("hidden");
+    return;
+  }
+
+  list.innerHTML = mine.map(n => `
+    <div class="nl-card">
+      <div class="nl-card-header">
+        <div>
+          <div class="nl-name">${esc(n.newsletter_name)}</div>
+          <div class="nl-meta">
+            ${freqLabel(n)} &middot; ${n.cutoff_days || 30} days back &middot; ${n.target_count || 30} articles
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="badge ${n.active === 'no' ? 'badge-paused' : 'badge-active'}">
+            ${n.active === 'no' ? 'Paused' : 'Active'}
+          </span>
+        </div>
+      </div>
+      <div class="nl-actions" style="margin-top:12px">
+        <button class="btn btn-secondary btn-sm" onclick="editNewsletter('${esc(n.id)}')">Edit</button>
+        <button class="btn btn-secondary btn-sm" onclick="togglePause('${esc(n.id)}')">
+          ${n.active === 'no' ? 'Resume' : 'Pause'}
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="removeNewsletter('${esc(n.id)}')">Remove</button>
+      </div>
+    </div>
+  `).join("");
+
+  addPrompt.classList.remove("hidden");
+}
+
+function freqLabel(n) {
+  const f = n.frequency || "weekly";
+  const d = n.run_day || "";
+  if (f === "daily") return "Daily";
+  if (f === "weekly") return `Weekly on ${cap(d)}`;
+  if (f === "biweekly") return `Every two weeks on ${cap(d)}`;
+  if (f === "monthly") return `Monthly on the ${d}`;
+  return cap(f);
+}
+
+// ── Add / Edit form ───────────────────────────────────────────────────────────
+function showAddForm() {
+  document.getElementById("form-mode").value = "add";
+  document.getElementById("form-id").value = "";
+  document.getElementById("form-title").textContent = "Add a newsletter";
+  document.getElementById("f-name").value = "";
+  document.getElementById("f-urls").value = "";
+  document.getElementById("f-cutoff").value = "30";
+  document.getElementById("f-target").value = "30";
+  document.getElementById("f-freq").value = "weekly";
+  updateRunDayOptions();
+  clearAlert("alert-form");
+  document.getElementById("nl-form").classList.remove("hidden");
+  document.getElementById("form-divider").style.display = "";
+  document.getElementById("nl-form").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function editNewsletter(id) {
+  const n = allNewsletters.find(x => x.id === id);
+  if (!n) return;
+  document.getElementById("form-mode").value = "edit";
+  document.getElementById("form-id").value = id;
+  document.getElementById("form-title").textContent = "Edit newsletter";
+  document.getElementById("f-name").value = n.newsletter_name || "";
+  document.getElementById("f-urls").value = n.source_urls || "";
+  document.getElementById("f-cutoff").value = n.cutoff_days || 30;
+  document.getElementById("f-target").value = n.target_count || 30;
+  document.getElementById("f-freq").value = n.frequency || "weekly";
+  updateRunDayOptions();
+  document.getElementById("f-runday").value = n.run_day || "monday";
+  clearAlert("alert-form");
+  document.getElementById("nl-form").classList.remove("hidden");
+  document.getElementById("form-divider").style.display = "";
+  document.getElementById("add-new-prompt").classList.add("hidden");
+  document.getElementById("nl-form").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function cancelForm() {
+  document.getElementById("nl-form").classList.add("hidden");
+  document.getElementById("form-divider").style.display = "none";
+  document.getElementById("add-new-prompt").classList.remove("hidden");
+}
+
+function updateRunDayOptions() {
+  const freq = document.getElementById("f-freq").value;
+  const field = document.getElementById("run-day-field");
+  const sel = document.getElementById("f-runday");
+
+  if (freq === "daily") {
+    field.classList.add("hidden");
+    return;
+  }
+  field.classList.remove("hidden");
+
+  if (freq === "monthly") {
+    sel.innerHTML = `<option value="1st">1st of month</option><option value="15th">15th of month</option>`;
+  } else {
+    sel.innerHTML = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
+      .map(d => `<option value="${d.toLowerCase()}">${d}</option>`).join("");
+  }
+}
+
+// ── Save ──────────────────────────────────────────────────────────────────────
+async function saveNewsletter() {
+  const name  = document.getElementById("f-name").value.trim();
+  const urls  = document.getElementById("f-urls").value.trim();
+  const days  = parseInt(document.getElementById("f-cutoff").value) || 30;
+  const count = parseInt(document.getElementById("f-target").value) || 30;
+  const freq  = document.getElementById("f-freq").value;
+  const day   = freq === "daily" ? "" : document.getElementById("f-runday").value;
+
+  if (!name) { showAlert("alert-form", "Please enter a newsletter name.", "error"); return; }
+  if (!urls)  { showAlert("alert-form", "Please enter at least one source URL.", "error"); return; }
+
+  const token = promptForToken();
+  if (!token) return;
+
+  const btn = document.getElementById("save-btn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Saving…';
+  clearAlert("alert-form");
+
+  const mode = document.getElementById("form-mode").value;
+  const id   = document.getElementById("form-id").value;
+
+  try {
+    if (mode === "add") {
+      const newEntry = {
+        id: `nl_${Date.now()}`,
+        newsletter_name: name,
+        editor_email: currentEmail,
+        source_urls: urls,
+        cutoff_days: days,
+        target_count: count,
+        frequency: freq,
+        run_day: day,
+        active: "yes",
+        created: new Date().toISOString().split("T")[0]
+      };
+      allNewsletters.push(newEntry);
+    } else {
+      const idx = allNewsletters.findIndex(x => x.id === id);
+      if (idx >= 0) Object.assign(allNewsletters[idx], {
+        newsletter_name: name, source_urls: urls,
+        cutoff_days: days, target_count: count,
+        frequency: freq, run_day: day
+      });
+    }
+
+    await commitConfig(token, `${mode === "add" ? "Add" : "Update"} newsletter: ${name}`);
+    cancelForm();
+    renderList();
+    showAlert("alert-results",
+      mode === "add" ? `"${name}" added. Your first digest will arrive on the next scheduled run.`
+                     : `"${name}" updated.`, "success");
+  } catch (e) {
+    showAlert("alert-form", `Save failed: ${e.message}`, "error");
+    // Roll back optimistic update
+    const { newsletters } = await fetchConfig();
+    allNewsletters = newsletters;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Save newsletter";
+  }
+}
+
+// ── Pause / Resume ────────────────────────────────────────────────────────────
+async function togglePause(id) {
+  const n = allNewsletters.find(x => x.id === id);
+  if (!n) return;
+  const token = promptForToken();
+  if (!token) return;
+  n.active = n.active === "no" ? "yes" : "no";
+  try {
+    await commitConfig(token, `${n.active === "yes" ? "Resume" : "Pause"} newsletter: ${n.newsletter_name}`);
+    renderList();
+    showAlert("alert-results",
+      `"${n.newsletter_name}" ${n.active === "yes" ? "resumed" : "paused"}.`, "success");
+  } catch (e) {
+    showAlert("alert-results", `Failed: ${e.message}`, "error");
+    n.active = n.active === "no" ? "yes" : "no"; // rollback
+  }
+}
+
+// ── Remove ────────────────────────────────────────────────────────────────────
+async function removeNewsletter(id) {
+  const n = allNewsletters.find(x => x.id === id);
+  if (!n) return;
+  if (!confirm(`Remove "${n.newsletter_name}"? This cannot be undone.`)) return;
+  const token = promptForToken();
+  if (!token) return;
+  allNewsletters = allNewsletters.filter(x => x.id !== id);
+  try {
+    await commitConfig(token, `Remove newsletter: ${n.newsletter_name}`);
+    renderList();
+    showAlert("alert-results", `"${n.newsletter_name}" removed.`, "success");
+  } catch (e) {
+    showAlert("alert-results", `Failed: ${e.message}`, "error");
+    allNewsletters.push(n); // rollback
+  }
+}
+
+// ── GitHub write ──────────────────────────────────────────────────────────────
+async function commitConfig(token, message) {
+  const content = btoa(JSON.stringify({ newsletters: allNewsletters }, null, 2));
+  const resp = await fetch(API, {
+    method: "PUT",
+    headers: {
+      "Authorization": `token ${token}`,
+      "Accept": "application/vnd.github+json",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ message, content, sha: fileSha })
+  });
+  if (!resp.ok) {
+    const err = await resp.json();
+    throw new Error(err.message || `GitHub API error ${resp.status}`);
+  }
+  const data = await resp.json();
+  fileSha = data.content.sha;
+}
+
+function promptForToken() {
+  const token = window.prompt(
+    "Enter your GitHub Personal Access Token to save changes.\n\n" +
+    "Need one? Go to github.com → Settings → Developer settings → Personal access tokens → " +
+    "Fine-grained tokens → Create token. Grant 'Contents: Read and write' on this repo."
+  );
+  if (!token || !token.trim()) {
+    showAlert("alert-results", "No token provided — changes not saved.", "info");
+    return null;
+  }
+  return token.trim();
+}
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+function cap(s) { return s ? s[0].toUpperCase() + s.slice(1) : ""; }
+
+function showAlert(id, msg, type) {
+  const el = document.getElementById(id);
+  el.innerHTML = `<div class="alert alert-${type === "error" ? "error" : type === "info" ? "info" : "success"}">${msg}</div>`;
+}
+function clearAlert(id) { document.getElementById(id).innerHTML = ""; }
+
+function setLookupLoading(on) {
+  const btn = document.querySelector("#section-lookup .btn-primary");
+  const txt = document.getElementById("lookup-btn-text");
+  btn.disabled = on;
+  txt.innerHTML = on ? '<span class="spinner"></span>' : "Look up";
+}
+
+// Init run-day options on load
+updateRunDayOptions();
+
+// Allow Enter key in lookup field
+document.getElementById("lookup-email").addEventListener("keydown", e => {
+  if (e.key === "Enter") handleLookup();
+});
+</script>
+
+</body>
+</html>
