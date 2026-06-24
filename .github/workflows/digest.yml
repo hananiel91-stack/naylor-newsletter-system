@@ -1,0 +1,37 @@
+name: Newsletter Digest
+
+on:
+  schedule:
+    # Runs every day at 6:00 AM UTC (2:00 AM ET / 1:00 AM CT)
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    # Also allows manual runs from the GitHub Actions tab
+    inputs:
+      newsletter_name:
+        description: "Run a specific newsletter by name (leave blank for all due today)"
+        required: false
+        default: ""
+
+jobs:
+  run-digests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4 anthropic python-dateutil
+
+      - name: Run newsletter digest
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          NEWSLETTER_NAME: ${{ github.event.inputs.newsletter_name }}
+        run: python scraper/pipeline.py
