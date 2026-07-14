@@ -11,6 +11,21 @@
       "run_day": "wednesday",
       "active": "yes",
       "created": "2026-06-24"
+    },
+    {
+      "id": "nl_1784054633738",
+      "newsletter_name": "World Cup Update",
+      "editor_email": "cdavis@naylor.com",
+      "source_urls": "https://cnn.com",
+      "topic_focus": "",
+      "web_search_enabled": "yes",
+      "cutoff_days": 30,
+      "target_count": 30,
+      "frequency": "weekly",
+      "run_day": "monday",
+      "custom_prompt": "",
+      "active": "yes",
+      "created": "2026-07-14"
     }
   ]
 }
