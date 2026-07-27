@@ -74,7 +74,7 @@ ARTICLES FROM FIXED SOURCES:
     try:
         kwargs = dict(
             model="claude-opus-4-5",
-            max_tokens=4000,
+            max_tokens=8000,
             messages=[{"role": "user", "content": prompt}]
         )
         if tools:
@@ -91,6 +91,10 @@ ARTICLES FROM FIXED SOURCES:
         raw = raw.strip()
         if raw.startswith("```"):
             raw = re.sub(r"^```[a-z]*\n?", "", raw).rstrip("```").strip()
+
+        if not raw:
+            logging.error(f"Summarize error: empty response from Claude (stop_reason={resp.stop_reason})")
+            return []
 
         return json.loads(raw)
 
