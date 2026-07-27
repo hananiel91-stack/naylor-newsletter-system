@@ -26,6 +26,21 @@
       "custom_prompt": "",
       "active": "yes",
       "created": "2026-07-14"
+    },
+    {
+      "id": "nl_1785174695335",
+      "newsletter_name": "AATB News Brief (Russell Underwood)",
+      "editor_email": "awoods@naylor.com",
+      "source_urls": "https://www.sciencedaily.com/news/health_medicine/\nhttps://scitechdaily.com/news/biology/\nhttps://medicalxpress.com/research-news/",
+      "topic_focus": "Focus on new tissue research and regenerative medicine — search terms \"tissue research\" and \"regenerative medicine.\" Prioritize university news service articles about recent faculty research. Only include coverage of new/recent findings, not reviews or older studies. Favor U.S.-based research; occasional international research is fine but shouldn't dominate.",
+      "web_search_enabled": "yes",
+      "cutoff_days": 7,
+      "target_count": 5,
+      "frequency": "weekly",
+      "run_day": "monday",
+      "custom_prompt": "",
+      "active": "yes",
+      "created": "2026-07-27"
     }
   ]
 }
