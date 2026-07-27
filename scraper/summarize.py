@@ -73,7 +73,7 @@ ARTICLES FROM FIXED SOURCES:
 
     try:
         kwargs = dict(
-            model="claude-opus-4-5",
+            model="claude-sonnet-5",
             max_tokens=8000,
             messages=[{"role": "user", "content": prompt}]
         )
