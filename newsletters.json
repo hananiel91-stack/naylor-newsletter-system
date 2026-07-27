@@ -32,7 +32,7 @@
       "newsletter_name": "AATB News Brief (Russell Underwood)",
       "editor_email": "awoods@naylor.com",
       "source_urls": "https://www.sciencedaily.com/news/health_medicine/\nhttps://scitechdaily.com/news/biology/\nhttps://medicalxpress.com/research-news/",
-      "topic_focus": "Focus on new tissue research and regenerative medicine — search terms \"tissue research\" and \"regenerative medicine.\" Prioritize university news service articles about recent faculty research. Only include coverage of new/recent findings, not reviews or older studies. Favor U.S.-based research; occasional international research is fine but shouldn't dominate.",
+      "topic_focus": "Focus on new tissue research and regenerative medicine — search terms \"tissue research\" and \"regenerative medicine.\" This filter applies to source-list articles as well as discovered ones; do not include general biology news that doesn't connect to tissue research or regenerative medicine. Prioritize university news service articles about recent faculty research. Only include coverage of new/recent findings, not reviews or older studies. Favor U.S.-based research; occasional international research is fine but shouldn't dominate. Studies on non-human species are only relevant if the article draws an explicit connection to human tissue or disease. Flag rather than auto-include any article primarily about stem cell therapy (embryonic or engineered stem cells) — AATB readers are sensitive to this topic. Target 5 articles for this section. Summarize each in one sentence that does not begin with \"The article.\"",
       "web_search_enabled": "yes",
       "cutoff_days": 7,
       "target_count": 5,
