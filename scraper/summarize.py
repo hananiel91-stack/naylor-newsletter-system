@@ -96,8 +96,10 @@ ARTICLES FROM FIXED SOURCES:
             logging.error(f"Summarize error: empty response from Claude (stop_reason={resp.stop_reason})")
             return []
 
-        return json.loads(raw)
-
+        start, end = raw.find("["), raw.rfind("]")
+        json_str = raw[start:end + 1] if start != -1 and end != -1 and end > start else raw
+        return json.loads(json_str)
     except Exception as e:
-        logging.error(f"Summarize error: {e}")
+        raw_snippet = locals().get("raw", "")[:300]
+        logging.error(f"Summarize error: {e} | raw response: {raw_snippet!r}")
         return []
