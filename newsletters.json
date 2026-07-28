@@ -9,6 +9,7 @@
       "target_count": 20,
       "frequency": "weekly",
       "run_day": "wednesday",
+      "allow_undated": "yes",
       "active": "yes",
       "created": "2026-06-24"
     },
@@ -24,6 +25,7 @@
       "frequency": "weekly",
       "run_day": "monday",
       "custom_prompt": "",
+      "allow_undated": "yes",
       "active": "yes",
       "created": "2026-07-14"
     },
@@ -39,6 +41,7 @@
       "frequency": "weekly",
       "run_day": "monday",
       "custom_prompt": "",
+      "allow_undated": "no",
       "active": "yes",
       "created": "2026-07-27"
     }
