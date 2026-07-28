@@ -1,5 +1,6 @@
 import os, re, json, logging
 import anthropic
+from datetime import datetime, timedelta
 
 DEFAULT_PROMPT_INSTRUCTIONS = """For each article write ONE original AP-style sentence summarizing the key point for industry readers.
 
@@ -47,10 +48,11 @@ After summarizing the articles above, use your web search tool to find up to 5 a
 recent articles about {newsletter_topic} that are NOT already in the list above.
 {('Focus your search on: ' + topic_focus.strip()) if topic_focus.strip() else ''}
 For each discovered article, include it in the JSON output with a field "discovered": true.
-Only include articles from credible industry sources published within the last {recency_days} days.
+Only include articles from credible industry sources published on or after {(datetime.utcnow() - timedelta(days=recency_days)).strftime('%B %d, %Y')} (within the last {recency_days} days). For each discovered article, also include a "published_date" field in YYYY-MM-DD format so the date can be verified.
 """
 
     prompt = f"""You are an editorial assistant for the Naylor {newsletter_topic} newsletter.
+Today's date is {datetime.utcnow().strftime('%B %d, %Y')}.
 {focus_block}
 {instructions}
 
@@ -61,6 +63,7 @@ Return a JSON array only. Each object must have exactly:
   source_name  : domain only, e.g. facilityexecutive.com
   url          : full URL
   discovered   : true if you found this via web search, omit or false otherwise
+  published_date : YYYY-MM-DD publish date, required for discovered articles (omit for fixed-source articles)
 
 Return ONLY the JSON array, no markdown.
 {search_instruction}
@@ -108,7 +111,26 @@ ARTICLES FROM FIXED SOURCES:
 
         start, end = raw.find("["), raw.rfind("]")
         json_str = raw[start:end + 1] if start != -1 and end != -1 and end > start else raw
-        return json.loads(json_str)
+        parsed = json.loads(json_str)
+
+        # Hard-enforce recency for web-discovered articles instead of trusting
+        # the model's compliance with the prompt instruction alone.
+        cutoff_dt = datetime.utcnow() - timedelta(days=recency_days)
+        filtered = []
+        for item in parsed:
+            if item.get("discovered"):
+                pub = item.get("published_date", "")
+                pub_dt = None
+                if pub:
+                    try:
+                        pub_dt = datetime.strptime(pub[:10], "%Y-%m-%d")
+                    except Exception:
+                        pub_dt = None
+                if not pub_dt or pub_dt < cutoff_dt:
+                    logging.warning(f"Dropping discovered article outside recency window: {item.get('title', '')!r} ({pub or 'no date'})")
+                    continue
+            filtered.append(item)
+        return filtered
     except Exception as e:
         raw_snippet = locals().get("raw", "")[:300]
         logging.error(f"Summarize error: {e} | raw response: {raw_snippet!r}")
