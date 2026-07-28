@@ -54,7 +54,8 @@ def _run_one(cfg: dict) -> dict:
     # New config fields (with safe defaults for existing newsletters)
     topic_focus      = cfg.get("topic_focus", "").strip()
     custom_prompt    = cfg.get("custom_prompt", "").strip()
-    web_search       = cfg.get("web_search_enabled", "yes") != "no"
+        web_search       = cfg.get("web_search_enabled", "yes") != "no"
+        allow_undated    = cfg.get("allow_undated", "yes") != "no"
 
     logging.info(f"--- {name} | {len(sources)} sources | cutoff {cutoff.date()} ---")
     session = make_session()
@@ -78,9 +79,10 @@ def _run_one(cfg: dict) -> dict:
 
         logging.info(f"  {site}: {len(dated)} dated, {len(undated)} undated")
         candidates.extend(dated)
-        for a in undated[:3]:
-            a["undated"] = True
-        candidates.extend(undated[:3])
+        if allow_undated:
+            for a in undated[:3]:
+                a["undated"] = True
+            candidates.extend(undated[:3])
         time.sleep(CRAWL_DELAY)
 
     dated_first  = [a for a in candidates if not a.get("undated")]
@@ -103,7 +105,8 @@ def _run_one(cfg: dict) -> dict:
         to_process, name,
         topic_focus=topic_focus,
         custom_prompt=custom_prompt,
-        web_search_enabled=web_search
+        web_search_enabled=web_search,
+        recency_days=cfg.get("cutoff_days", 30)
     )
     if not results:
         return {"newsletter": name, "status": "summarization_failed"}
