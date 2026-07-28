@@ -54,8 +54,8 @@ def _run_one(cfg: dict) -> dict:
     # New config fields (with safe defaults for existing newsletters)
     topic_focus      = cfg.get("topic_focus", "").strip()
     custom_prompt    = cfg.get("custom_prompt", "").strip()
-        web_search       = cfg.get("web_search_enabled", "yes") != "no"
-        allow_undated    = cfg.get("allow_undated", "yes") != "no"
+    web_search       = cfg.get("web_search_enabled", "yes") != "no"
+    allow_undated    = cfg.get("allow_undated", "yes") != "no"
 
     logging.info(f"--- {name} | {len(sources)} sources | cutoff {cutoff.date()} ---")
     session = make_session()
