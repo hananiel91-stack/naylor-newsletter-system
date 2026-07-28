@@ -83,6 +83,15 @@ ARTICLES FROM FIXED SOURCES:
 
         resp = client.messages.create(**kwargs)
 
+        # Claude can pause mid-turn on longer agentic work (e.g. running
+        # several web searches). Keep feeding the conversation back so it
+        # can finish, capped so a stuck loop can't run forever.
+        turns = 0
+        while resp.stop_reason == "pause_turn" and turns < 5:
+            kwargs["messages"] = kwargs["messages"] + [{"role": "assistant", "content": resp.content}]
+            resp = client.messages.create(**kwargs)
+            turns += 1
+
         # Collect all text blocks (Claude may interleave tool use and text)
         raw = ""
         for block_item in resp.content:
