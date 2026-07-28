@@ -76,8 +76,9 @@ ARTICLES FROM FIXED SOURCES:
         tools.append({"type": "web_search_20250305", "name": "web_search"})
 
     try:
+        model = "claude-sonnet-5" if web_search_enabled else "claude-haiku-4-5-20251001"
         kwargs = dict(
-            model="claude-sonnet-5",
+            model=model,
             max_tokens=8000,
             messages=[{"role": "user", "content": prompt}]
         )
