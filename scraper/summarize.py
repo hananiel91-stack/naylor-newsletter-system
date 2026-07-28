@@ -12,13 +12,14 @@ Rules:
 6. Do not include source name or URL in the summary"""
 
 
-def summarize_articles(articles, newsletter_topic, topic_focus="", custom_prompt="", web_search_enabled=True):
+def summarize_articles(articles, newsletter_topic, topic_focus="", custom_prompt="", web_search_enabled=True, recency_days=60):
     """
     Summarize articles using Claude.
 
     topic_focus      : free-text editor guidance, e.g. "focus on HVAC and campus safety, avoid K-12"
     custom_prompt    : full prompt override from the advanced editor (optional)
     web_search_enabled: if True, Claude also searches the web for additional articles
+    recency_days   : how many days back web-discovered articles may be from
     """
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
@@ -46,7 +47,7 @@ After summarizing the articles above, use your web search tool to find up to 5 a
 recent articles about {newsletter_topic} that are NOT already in the list above.
 {('Focus your search on: ' + topic_focus.strip()) if topic_focus.strip() else ''}
 For each discovered article, include it in the JSON output with a field "discovered": true.
-Only include articles from credible industry sources published within the last 60 days.
+Only include articles from credible industry sources published within the last {recency_days} days.
 """
 
     prompt = f"""You are an editorial assistant for the Naylor {newsletter_topic} newsletter.
